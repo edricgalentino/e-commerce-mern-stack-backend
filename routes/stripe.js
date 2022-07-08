@@ -1,22 +1,21 @@
 const routes = require("express").Router();
 const stripe = require("stripe")(process.env.STRIPE_KEY);
 
-routes.post("/payment", async (req, res) => {
-    const { tokenId, amount } = req.body;
-    stripe.charges.create(
-        {
-            source: tokenId,
-            amount: amount,
-            currency: "usd",
-        },
-        (stripeErr, stripeRes) => {
-            if (stripeErr) {
-                res.status(500).send({ error: stripeErr });
-            } else {
-                res.status(200).send({ success: stripeRes });
-            }
-        }
-    );
+routes.post("/create-checkout-session", async (req, res) => {
+    const session = await stripe.checkout.sessions.create({
+        line_items: [
+            {
+                // Provide the exact Price ID (for example, pr_1234) of the product you want to sell
+                price: "price_1LI1VxFkoqITIvETQMjUamgR",
+                quantity: 1,
+            },
+        ],
+        mode: "payment",
+        success_url: `http://localhost:3000/payment/success`,
+        cancel_url: `http://localhost:3000/`,
+    });
+
+    res.redirect(303, session.url);
 });
 
 module.exports = routes;
