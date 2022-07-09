@@ -54,25 +54,19 @@ routes.get("/find/:id", async (req, res) => {
 routes.get("/", async (req, res) => {
     const qNew = req.query.new;
     const qCategory = req.query.category;
-    const qColor = req.query.color;
     try {
         let products;
 
         if (qNew) {
             products = await Product.find().sort({ createdAt: -1 }).limit(8);
         } else if (qCategory) {
-            if (qColor) {
-                products = await Product.find({ category: qCategory, color: qColor });
-            } else {
-                products = await Product.find({ category: qCategory });
-            }
+            products = await Product.find({ category: qCategory });
         } else {
             products = await Product.find();
         }
-
         res.status(200).json(products);
     } catch (err) {
-        res.status(500).json(err);
+        res.status(500).json({ message: err });
     }
 });
 
