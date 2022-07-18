@@ -2,6 +2,7 @@ const routes = require("express").Router();
 const User = require("../models/User");
 const { verifyToken, verifyTokenAndAuthentication, verifyTokenAndAdmin } = require("./verifyToken");
 const CryptoJS = require("crypto-js");
+const jwt = require("jsonwebtoken");
 
 // GET ALL USERS
 routes.get("/", verifyTokenAndAuthentication, async (req, res) => {
@@ -9,6 +10,19 @@ routes.get("/", verifyTokenAndAuthentication, async (req, res) => {
     try {
         const user = query ? await User.find().sort({ _id: -1 }).limit(3) : await User.find({});
         res.status(200).json(user);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// GET USER BY TOKEN
+routes.get("/find/:token", async (req, res) => {
+    try {
+        // decode token with jwt
+        const decoded = jwt.verify(req.params.token, process.env.SECRET_KEY);
+        const user = await User.findById(decoded.id);
+        const { password, ...userWithoutPassword } = user._doc;
+        res.status(200).json(userWithoutPassword);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
