@@ -2,6 +2,7 @@ const routes = require("express").Router();
 const stripe = require("stripe")(process.env.STRIPE_KEY);
 
 routes.post("/create-checkout-session", async (req, res) => {
+    const { userId, products, total } = req.body;
     const session = await stripe.checkout.sessions.create({
         line_items: [
             {
@@ -12,7 +13,7 @@ routes.post("/create-checkout-session", async (req, res) => {
         ],
         mode: "payment",
         success_url: `http://localhost:3000/payment/success`,
-        cancel_url: `http://localhost:3000/`,
+        cancel_url: `http://localhost:3000/cart`,
     });
 
     res.redirect(303, session.url);
