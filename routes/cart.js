@@ -3,7 +3,6 @@ const Cart = require("../models/Cart");
 const { verifyToken, verifyTokenAndAuthentication, verifyTokenAndAdmin } = require("./verifyToken");
 
 //CREATE
-
 routes.post("/", verifyToken, async (req, res) => {
     const newCart = new Cart(req.body);
 
@@ -16,16 +15,25 @@ routes.post("/", verifyToken, async (req, res) => {
 });
 
 //UPDATE
-routes.put("/:id", verifyTokenAndAuthentication, async (req, res) => {
+routes.put("/:userId", verifyTokenAndAuthentication, async (req, res) => {
     try {
-        const updatedCart = await Cart.findByIdAndUpdate(
-            req.params.id,
-            {
-                $set: req.body,
-            },
-            { new: true }
-        );
+        const updatedCart = await Cart.findOneAndUpdate(req.params.userId, {
+            $set: req.body,
+        });
         res.status(200).json(updatedCart);
+    } catch (err) {
+        res.status(500).json(err);
+    }
+});
+
+// REMOVE A PRODUCT FROM CART
+routes.delete("/:productId", verifyToken, async (req, res) => {
+    try {
+        const idx = req.query.index;
+        const deletedProduct = await Cart.findOneAndUpdate(req.params.productId, {
+            $pull: { products: { idx: { $exists: true } } },
+        });
+        res.status(200).json("adsadwda");
     } catch (err) {
         res.status(500).json(err);
     }
@@ -52,7 +60,6 @@ routes.get("/find/:userId", verifyTokenAndAuthentication, async (req, res) => {
 });
 
 // //GET ALL
-
 routes.get("/", verifyTokenAndAdmin, async (req, res) => {
     try {
         const carts = await Cart.find();
