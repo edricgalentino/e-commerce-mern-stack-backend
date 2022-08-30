@@ -23,6 +23,7 @@ mongoose
 
 app.use(cors());
 app.use(express.json());
+// set dirname
 app.use("/auth", authRoutes);
 app.use("/user", userRoutes);
 app.use("/product", productRoutes);
